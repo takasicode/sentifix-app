@@ -1,13 +1,10 @@
 import Head from "next/head";
+import Aside from "@/components/Aside";
 import { useEffect } from "react";
-
 export default function Layout(props) {
-  useEffect(() => {
-    require("bootstrap/dist/js/bootstrap.bundle.min.js");
-    require("../public/js/sidebar.js");
-  }, []);
+
   return (
-    <div>
+    < >
       <Head>
         <title>{props.title}</title>
 
@@ -29,7 +26,13 @@ export default function Layout(props) {
           rel="stylesheet"
         />
       </Head>
+      <main>
+      <Aside>
+   
       {props.children}
-    </div>
+        </Aside>
+
+      </main>
+    </>
   );
 }
