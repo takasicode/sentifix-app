@@ -1,12 +1,17 @@
 from flask import Flask, render_template, jsonify, request
+from flaskext.mysql import MySQL
 import joblib
 import pandas as pd
 import os
-
+from datetime import datetime
 
 app = Flask(__name__)
-
-
+mysql = MySQL(app)
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = ''
+app.config['MYSQL_DATABASE_DB'] = 'sentifix'
+mysql.init_app(app)
 models_dir = os.path.abspath('models')
 
 
@@ -31,6 +36,8 @@ def predict():
         text_tfidf = tfidf_vectorizer.transform(reviews)
 
         predictions = clf.predict(text_tfidf).tolist()
+        insert_review_predictions(reviews, predictions)
+
         results = []
         for review, prediction in zip(reviews, predictions):
             result_dict = {
@@ -44,6 +51,17 @@ def predict():
     else:
         return jsonify({'error': 'No file uploaded'})
 
+def insert_review_predictions(reviews, predictions):
+    cursor = mysql.get_db().cursor()
 
+    for review, prediction in zip(reviews, predictions):
+        label = 'POSITIVE' if prediction == 1 else 'NEGATIVE'
+        cursor.execute(
+            "INSERT INTO review (review, analisis,division,createdAt) VALUES (%s, %s,'web',%s)",
+            (review, label, datetime.now())
+        )
+    
+    mysql.get_db().commit()
+    cursor.close()
 if __name__ == '__main__':
     app.run(debug=True)
