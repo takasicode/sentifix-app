@@ -1,12 +1,13 @@
 import Head from "next/head";
 import Aside from "@/components/Aside";
 import { useEffect } from "react";
-export default function Layout(props) {
+
+export default function Layout({title,children}:{title: string,children:React.ReactNode}) {
 
   return (
     < >
       <Head>
-        <title>{props.title}</title>
+        <title>{title}</title>
 
         <meta name="author" content="Team Sentifix" />
         <meta name="description" content="BTNG Feedback Sentiment Analysis" />
@@ -28,8 +29,7 @@ export default function Layout(props) {
       </Head>
       <main>
       <Aside>
-   
-      {props.children}
+      {children}
         </Aside>
 
       </main>
