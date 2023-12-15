@@ -9,7 +9,11 @@ import {
 import { UserNav } from "./user-nav";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const Aside = ({ children }) => {
+const Aside = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [open, setOpen] = useState(true);
   const Menus = [
     { title: "Dashboard", src: MdOutlineDashboard,url:'/' },
@@ -45,8 +49,9 @@ const Aside = ({ children }) => {
               key={index}
              
             >
-              <Link href={Menu.url}  className={`flex  rounded-md p-2 cursor-pointer hover:bg-[#4154F1]/[0.1] text-[#222] text-sm font-semibold items-center gap-x-4 
-              ${Menu.gap ? "mt-9" : "mt-2"} ${router.pathname === Menu.url ? "bg-[#4154F1]/[0.1]" : ""}`}>
+              <Link href={Menu.url}  className={`flex  rounded-md p-2 cursor-pointer hover:bg-[#4154F1]/[0.1] text-[#222] text-sm font-semibold items-center gap-x-4 mb-2 
+              
+               ${router.pathname === Menu.url ? "bg-[#4154F1]/[0.1]" : ""}`}>
 
               <Menu.src size={25} />
               <span className={`${!open && "hidden"} origin-left duration-200  `}>
@@ -58,7 +63,7 @@ const Aside = ({ children }) => {
         </ul>
       </div>
       <div className="h-screen flex-1 px-7">
-        <div className="hidden flex-col md:flex">
+        <div className=" flex-col md:flex">
           <div className="border-b">
             <div className="flex h-16 items-center px-4">
            

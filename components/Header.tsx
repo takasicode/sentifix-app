@@ -1,4 +1,10 @@
-export default function Header(props) {
+import React from "react";
+
+export default function Header({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div>
       {/* <!-- ======= Header ======= --> */}
@@ -55,7 +61,7 @@ export default function Header(props) {
       </header>
       {/* <!-- End Header --> */}
 
-      {props.children}
+      {children}
     </div>
   );
 }
