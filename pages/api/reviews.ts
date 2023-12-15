@@ -7,7 +7,5 @@ export default async  function handler(req:NextApiRequest, res:NextApiResponse) 
        
         const reviews = await prisma.review.findMany()
         res.status(200).json(reviews )
-      } else {
-       
       }
   }

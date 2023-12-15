@@ -63,7 +63,7 @@ const Aside = ({
         </ul>
       </div>
       <div className="h-screen flex-1 px-7">
-        <div className="hidden flex-col md:flex">
+        <div className=" flex-col md:flex">
           <div className="border-b">
             <div className="flex h-16 items-center px-4">
            
