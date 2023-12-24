@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MdUploadFile } from "react-icons/md";
-
+import { CircleSpinner } from 'react-spinner-overlay'
 import { useForm } from "react-hook-form";
 
 import axios from "axios";
@@ -31,18 +31,18 @@ interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
 
-  loading: boolean;
   mutate: () => void;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({
   isOpen,
   onClose,
- 
-  loading,
+
   mutate,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const form = useForm({
     defaultValues: {
       files: null,
@@ -55,7 +55,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
   if (!isMounted) {
     return null;
   }
-  
 
   const onSubmit = (data: { files: File | null }) => {
     if (data.files === null) {
@@ -65,25 +64,32 @@ const UploadModal: React.FC<UploadModalProps> = ({
       const selectedFile = data.files as File;
       let formData = new FormData();
       formData.append("file", selectedFile);
-
-      axios
-        .post("/python/predict", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then(function (response) {
-          console.log(response.data);
-          onClose()
-          mutate();
-        });
+      try {
+        setLoading(true);
+        axios
+          .post("/python/predict", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then(function (response) {
+            console.log(response.data);
+            setLoading(false);
+            onClose();
+            mutate();
+          });
+      } catch (error) {
+        setLoading(false);
+        console.log(error);
+      }
     }
   };
+console.log(loading);
 
   return (
     <Modal
-      title="Are you sure?"
-      description="This action cannot be undone."
+      title="Upload Excel"
+      description="Import Excels Data"
       isOpen={isOpen}
       onClose={onClose}
     >
@@ -93,12 +99,14 @@ const UploadModal: React.FC<UploadModalProps> = ({
           encType="multipart/form-data"
         >
           <FormField
+            
             control={form.control}
             name="files"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
+                  <Input className="!py-0"
+                  disabled={loading}
                     type="file"
                     onChange={(e) =>
                       field.onChange(e.target.files ? e.target.files[0] : null)
@@ -110,8 +118,8 @@ const UploadModal: React.FC<UploadModalProps> = ({
             )}
           />
 
-          <DialogFooter>
-            <Button type="submit">Save changes</Button>
+          <DialogFooter className="py-2">
+            <Button type="submit" disabled={loading} className="flex flex-row gap-1"> <CircleSpinner loading={loading} size={20}/> Save changes</Button>
           </DialogFooter>
         </form>
       </Form>

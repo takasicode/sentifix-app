@@ -28,8 +28,8 @@ console.log(review);
 
   return (
     <Layout title="Reviews">
-      <div className="flex items-center justify-between space-y-2 py-4">
-      <div className="mb-8">
+      <div className="flex items-center justify-between space-y-2 py-4 bg-white rounded-lg p-4 drop-shadow-sm">
+      <div className="mb-8 ">
       <h2 className="text-3xl font-bold tracking-tight  mb-2">Review Table</h2>
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
@@ -88,11 +88,11 @@ console.log(review);
             mutate={mutate}
             isOpen={open}
             onClose={() => setOpen(false)}
-            loading={loading}
+          
           />
         </div>
       </div>
-      <DataTable columns={columns} data={review as RV[]} />
+      <DataTable   mutate={mutate} columns={columns} data={review as RV[]}  />
     </Layout>
   );
 }

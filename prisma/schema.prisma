@@ -8,6 +8,7 @@ generator client {
 enum Label {
   POSITIVE
   NEGATIVE
+  NEUTRAL
 }
 
 datasource db {

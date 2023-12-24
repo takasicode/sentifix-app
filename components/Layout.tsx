@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Aside from "@/components/Aside";
 import { useEffect } from "react";
+import Header from "./HeaderDashboard";
 
 export default function Layout({title,children}:{title: string,children:React.ReactNode}) {
 
@@ -27,12 +28,9 @@ export default function Layout({title,children}:{title: string,children:React.Re
           rel="stylesheet"
         />
       </Head>
-      <main>
-      <Aside>
+      <Header>
       {children}
-        </Aside>
-
-      </main>
+        </Header>
     </>
   );
 }

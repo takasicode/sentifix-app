@@ -29,14 +29,18 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import axios from "axios";
+import { Reviews } from "./column";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  mutate: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  mutate,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -60,29 +64,46 @@ export function DataTable<TData, TValue>({
       columnVisibility,
     },
   });
-  const [disabled, setDisabled] = useState(true)
+  const [disabled, setDisabled] = useState(true);
   useEffect(() => {
     table.setPageSize(5);
   }, [table]);
-  console.log()
+  console.log(table.getFilteredSelectedRowModel());
   useEffect(() => {
-    if (table.getFilteredSelectedRowModel().rows.length>0) {
-      table.getFilteredSelectedRowModel().rows.map((item)=>{
+    if (table.getFilteredSelectedRowModel().rows.length > 0) {
+      table.getFilteredSelectedRowModel().rows.map((item) => {
         console.log(item.original);
-        
-      })
-     setDisabled(false)
-    }else{
-      setDisabled(true)
+      });
+      setDisabled(false);
+    } else {
+      setDisabled(true);
     }
-   
-  }, [table.getFilteredSelectedRowModel()])
-  
+  }, [table.getFilteredSelectedRowModel()]);
+  const onDelete = async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
 
+    if (selectedRows.length > 0) {
+      try {
+        // Use Promise.all to make multiple delete requests concurrently
+        await Promise.all(selectedRows.map(async (item) => {
+          const value = item.original as Reviews;
+  
+          const response = await axios.delete("/api/reviews", { data: { id: value.id } });
+          console.log(response.data);
+        }));
+  
+        // After all deletes are successful, trigger data re-fetch
+        mutate();
+      } catch (error) {
+        console.error("Error deleting reviews:", error);
+        // Handle errors as needed, e.g., display an error message to the user
+      }
+    }
+  };
 
   return (
-    <>
-      <div className="flex items-center py-4">
+    <div className="mt-6 bg-white rounded drop-shadow-sm p-4">
+      <div className="flex items-center py-4 ">
         <Input
           placeholder="Filter review..."
           value={(table.getColumn("review")?.getFilterValue() as string) ?? ""}
@@ -92,35 +113,40 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
         <div className="ml-auto">
-        <Button variant="destructive" className="ml-auto mr-4" disabled={disabled}>
-              Delete Data
-            </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto ">
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <Button
+            variant="destructive"
+            className="ml-auto mr-4"
+            disabled={disabled}
+            onClick={onDelete}
+          >
+            Delete Data
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto ">
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className="rounded-md border">
@@ -177,7 +203,6 @@ export function DataTable<TData, TValue>({
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of
           {table.getFilteredRowModel().rows.length} row(s) selected.
-         
         </div>
         <Button
           variant="outline"
@@ -196,6 +221,6 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
-    </>
+    </div>
   );
 }

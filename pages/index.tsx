@@ -2,10 +2,18 @@ import BarChart from "@/components/BarChart";
 import DivisionCard from "@/components/DivisionCard";
 import Header from "@/components/Header";
 import Layout from "@/components/Layout";
+import { Badge } from "@/components/ui/badge";
 
-import { Table,TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import prisma from "@/lib/prismadb";
-
+import { capitalizeFirstChar } from "@/lib/utils";
 
 import { GetStaticProps } from "next";
 
@@ -16,7 +24,7 @@ interface Review {
   id: number;
   review: string;
   division: string | null;
-  analisis: 'POSITIVE' | 'NEGATIVE';
+  analisis: "POSITIVE" | "NEGATIVE" |"NEUTRAL";
   date: string;
   createdAt: string; // Use Date instead of string
   updatedAt: string | null;
@@ -38,43 +46,59 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       props: { reviews: reviewsWithDateStrings },
     };
   } catch (error) {
-    console.error('Error fetching reviews:', error);
+    console.error("Error fetching reviews:", error);
     return {
       props: { reviews: [] }, // Provide an empty array or handle the error appropriately
     };
   }
 };
 const Home: React.FC<HomeProps> = ({ reviews }) => {
-  const webData = reviews.filter(item => item.division === "web");
-  const positiveWeb = webData.filter(item=>item.analisis
-    ==='POSITIVE').length
-  const jaringanData = reviews.filter(item => item.division === "jaringan");
-  const positiveJar = jaringanData.filter(item=>item.analisis
-    ==='POSITIVE').length
-  const mobileData = reviews.filter(item => item.division === "mobile");
-  const positiveMob = mobileData.filter(item=>item.analisis
-    ==='POSITIVE').length
-  const gameData = reviews.filter(item => item.division === "game");
-  const positiveGame = gameData.filter(item=>item.analisis
-    ==='POSITIVE').length
-  const dataData = reviews.filter(item => item.division === "data");
-  const positiveData = dataData.filter(item=>item.analisis
-    ==='POSITIVE').length
-  const multimediaData = reviews.filter(item => item.division === "multimedia");
-  const positiveMulmed = multimediaData.filter(item=>item.analisis
-    ==='POSITIVE').length
+  const webData = reviews.filter((item) => item.division === "web");
+  const positiveWeb = webData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const jaringanData = reviews.filter((item) => item.division === "jaringan");
+  const positiveJar = jaringanData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const mobileData = reviews.filter((item) => item.division === "mobile");
+  const positiveMob = mobileData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const gameData = reviews.filter((item) => item.division === "game");
+  const positiveGame = gameData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const dataData = reviews.filter((item) => item.division === "data");
+  const positiveData = dataData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const multimediaData = reviews.filter(
+    (item) => item.division === "multimedia"
+  );
+  const positiveMulmed = multimediaData.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
 
+  const totalPositive = reviews.filter(
+    (item) => item.analisis === "POSITIVE"
+  ).length;
+  const totalNeutral = reviews.filter(
+    (item) => item.analisis === "NEUTRAL"
+  ).length;
+  const totalNegative = reviews.filter(
+    (item) => item.analisis === "NEGATIVE"
+  ).length;
+  const sortedDAta = reviews.sort(
+    (a, b) => Date.parse(b.date) - Date.parse(a.date)
+  );
+  const limitedReviews = sortedDAta.slice(0, 10);
+  console.log(limitedReviews);
 
-    const totalPositive = reviews.filter(item => item.analisis === "POSITIVE").length;
-    const totalNegative = reviews.filter(item => item.analisis === "NEGATIVE").length;
-const sortedDAta = reviews.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-const limitedReviews = sortedDAta.slice(0, 10);
-    console.log(limitedReviews);
-    
   return (
     <Layout title="Dashboard">
       <div className="h-screen space-y-2 py-4">
-        <div className="mb-8">
+        <div className="mb-6 bg-white rounded-lg p-4 drop-shadow-sm">
           <h2 className="text-3xl font-bold tracking-tight mb-2">Overview</h2>
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
@@ -130,36 +154,57 @@ const limitedReviews = sortedDAta.slice(0, 10);
             totalCount={jaringanData.length}
           />
         </div>
-        <div className="grid md:grid-cols-3 gap-4 ">
-          <BarChart positive={totalPositive} negative={totalNegative} />
-      <div className="rounded-lg border drop-shadow-sm mt-8 p-8">
-      <table className="border  table-fixed ">
-          
-          <thead>
-            <tr>
-              <th>Invoice</th>
-              <th>Status</th>
-              <th>Method</th>
-              <th className="text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {limitedReviews.map((item,index)=>(
-
-            <tr key={index} className="!max-h-5">
-              <td className="font-medium">{index+1}</td>
-              <td className="text-ellipsis overflow-hidden">{item.review}</td>
-              <td>{item.division}</td>
-              <td className="text-right">{item.analisis}</td>
-            </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <div className="grid md:grid-cols-1 gap-2 ">
+          <BarChart positive={totalPositive} negative={totalNegative} neutral={totalNeutral} />
+          <div className="rounded-lg border drop-shadow-sm mt-2 ">
+            <table className="w-full text-sm text-left text-gray-500 ">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3">
+                    No
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Review
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Divisi
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right">
+                    Analisis
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {limitedReviews.map((item, index) => (
+                  <tr key={index} className="!max-h-5 bg-white border-b mb-2">
+                    <td
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {index + 1}
+                    </td>
+                    <td className=" px-6 py-4text-ellipsis overflow-hidden">
+                      {item.review}
+                    </td>
+                    <td className="px-6 py-4">
+                      {capitalizeFirstChar(item.division as string)}
+                    </td>
+                    <td className="text-right px-6 py-4">
+                      {item.analisis == "POSITIVE" ? (
+                        <Badge variant="success">{item.analisis}</Badge>
+                      ) : (
+                        <Badge variant="destructive">{item.analisis}</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </Layout>
   );
-}
+};
 
 export default Home;

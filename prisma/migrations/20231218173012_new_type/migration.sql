@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `review` MODIFY `analisis` ENUM('POSITIVE', 'NEGATIVE', 'NEUTRAL') NOT NULL;
