@@ -15,9 +15,9 @@ mysql.init_app(app)
 models_dir = os.path.abspath('models')
 
 
-clf = joblib.load(os.path.join(models_dir, 'naive_bayes_model.joblib'))
+clf = joblib.load(os.path.join(models_dir, 'vote.joblib'))
 tfidf_vectorizer = joblib.load(os.path.join(
-    models_dir, 'tfidf_vectorizer.joblib'))
+    models_dir, 'tfidf.joblib'))
 
 
 @app.route('/')
@@ -28,9 +28,11 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     file = request.files['file']
+    print(file)
     if file:
         data = pd.read_excel(file)
-        reviews = data['Review']
+        baseReviews = data['Review']
+        reviews = data['Review'].apply(preprocessing)
         dates = data['Timestamp'].astype(str)  # Convert Timestamp to string
         division = data['Divisi']
      
@@ -38,7 +40,7 @@ def predict():
 
         predictions = clf.predict(text_tfidf).tolist()
 
-        insert_review_predictions(reviews, predictions, dates, division)
+        insert_review_predictions(baseReviews, predictions, dates, division)
 
         results = []
         for review, prediction, timestamp, divisi in zip(reviews, predictions, dates, division):
@@ -58,7 +60,7 @@ def insert_review_predictions(reviews, predictions,dates,divisions):
     cursor = mysql.get_db().cursor()
 
     for review, prediction,date,division in zip(reviews, predictions,dates,divisions):
-        label = 'POSITIVE' if prediction == 1 else 'NEGATIVE'
+        label = 'POSITIVE' if prediction == 1 else ('NEUTRAL' if prediction == 2 else 'NEGATIVE')
         cursor.execute(
             "INSERT INTO review (review, analisis,date,division) VALUES (%s, %s,%s,%s)",
             (review, label, date,division)
@@ -68,3 +70,60 @@ def insert_review_predictions(reviews, predictions,dates,divisions):
     cursor.close()
 if __name__ == '__main__':
     app.run(debug=True)
+
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+
+import re
+def casefolding(text):
+    text = text.lower()
+    text = text.strip(" ")
+    text = re.sub(r'[?|$|.|!²_:")(-+,]','',text)
+    return text
+
+#tokenizing
+def nGramToken(text, ngram=2):
+    words = [word for word in text.split(" ") if word not in set(stopwords.words('indonesian'))]
+    
+    # Keep single words
+    if len(words) == 1:
+        return words
+
+    temp = zip(*[words[i:] for i in range(0, ngram)])
+    ans = [' '.join(ngram) for ngram in temp]
+    return ans
+def stopword_removal(text):
+    filters = stopwords.words('indonesian')
+    x = []
+    data =[]
+    def func(x):
+        if x in filters:
+            return False
+        else:
+            return True
+    fit = filter(func,text)
+    for x in fit:
+        data.append(x)
+    return data
+
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+def stemming(text):
+    factory = StemmerFactory()
+    stemmer = factory.create_stemmer()
+    do = []
+    for w in text:
+        dt = stemmer.stem(w)
+        do.append(dt)
+    d_clean=[]
+    d_clean=" ".join(do)
+  
+    return d_clean
+def preprocessing(str):
+    str = casefolding(str)
+   
+    str = nGramToken(str)
+    str = stopword_removal(str)
+    str = stemming(str)
+    
+    return str

@@ -1,17 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  compiler: {
+    styledComponents: true,
+  },
   reactStrictMode: true,
   rewrites: async () => {
     return [
       {
-        source: '/python/:path*',
+        source: "/python/:path*",
         destination:
-          process.env.NODE_ENV === 'development'
-            ? 'http://127.0.0.1:5328/:path*'
-            : '/python/',
+          process.env.NODE_ENV === "development"
+            ? "http://127.0.0.1:5328/:path*"
+            : "/python/",
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

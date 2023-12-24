@@ -26,8 +26,9 @@ ChartJS.register(
 type ChartCount={
     positive:number
     negative:number
+    neutral:number
 }
-function BarChart({negative,positive}:ChartCount) {
+function BarChart({negative,positive,neutral}:ChartCount) {
   const [chartData, setChartData] = useState<ChartData<"bar">>({
     labels: [],
     datasets: [],
@@ -42,6 +43,12 @@ function BarChart({negative,positive}:ChartCount) {
           data: [positive],
           borderColor: "rgb(29, 100, 32)",
           backgroundColor: "rgb(52, 177, 57)",
+        }, 
+        {
+          label: "Neutral",
+          data: [neutral],
+          borderColor: "rgb(69, 69, 69)",
+          backgroundColor: "rgb(121, 121, 121)",
         }, 
         {
             label: "Negative",
