@@ -18,6 +18,7 @@ import {
   MdMenu,
   MdOutlineMenuOpen,
 } from "react-icons/md";
+import { FaPencilAlt } from "react-icons/fa";
 import { UserNav } from "./user-nav";
 function Header({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -31,6 +32,7 @@ function Header({ children }: { children: React.ReactNode }) {
   const Menus = [
     { title: "Dashboard", src: MdOutlineDashboard, url: "/" },
     { title: "Reviews", src: MdOutlineTableChart, url: "/reviews" },
+    { title: "Inputs", src: FaPencilAlt,url:'/input' },
   ];
   return (
     <>

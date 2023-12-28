@@ -55,6 +55,26 @@ def predict():
         return jsonify({'results': results})
     else:
         return jsonify({'error': 'No file uploaded'})
+    
+@app.route('/singleInputs', methods=['POST'])
+def singleInputs():
+    request_json = request.form
+    text = request_json["text"]
+    if text:
+        preprocessed = preprocessing(text)
+        
+        text_list = [preprocessed]
+     
+        text_tfidf = tfidf_vectorizer.transform(text_list)
+
+        predictions = clf.predict(text_tfidf).tolist()
+
+        print(predictions)
+        return jsonify({'results': predictions})
+    else:
+        return jsonify({'error': 'No Text Detected'})
+
+
 def insert_review_predictions(reviews, predictions,dates,divisions):
     print(divisions)
     cursor = mysql.get_db().cursor()
